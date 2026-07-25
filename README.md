@@ -17,3 +17,12 @@ PrivateSwap is a privacy-preserving marketplace where buyers can purchase digita
 Public state: listings, availability flags, on-chain balances.
 Private witness: buyer credentials, negotiated price, and private delivery tokens.
 
+
+## Selected Project Idea — Vibe Trading (Primary)
+
+Vibe Trading is a privacy-preserving social trading platform where users follow and copy top traders without exposing trader identities or internal strategies. Midnight's selective disclosure and ZK proofs let copy-trades execute with verifiable fairness while keeping trader profiles and signals private. This enables safe copy-trading and preserves market integrity by proving correctness of executed strategies without doxxing liquidity providers.
+
+## Backup Idea — Private Stablecoin Remittance App
+
+Workers send money cross-border with amounts and recipient identities hidden from the public chain. Transfers are private yet auditable — Midnight balances consumer privacy with compliance-ready auditability, making remittances viable for mainstream and regulated use.
+
