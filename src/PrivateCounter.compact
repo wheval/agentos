@@ -1,0 +1,19 @@
+// Placeholder Compact contract (PrivateCounter)
+// Public state: count
+// Private witness: secret_increment used to privately increase the counter
+
+contract PrivateCounter {
+  pub state count: u64;
+
+  pub fn init() {
+    count = 0u64;
+  }
+
+  // This function accepts a private witness and increments public count
+  // The witness is not revealed on-chain; proofs verify correctness.
+  fn increment(witness: u64) {
+    // Example transformation — real contract will include ZK-friendly ops
+    let delta = witness % 10u64;
+    count = count + delta;
+  }
+}
