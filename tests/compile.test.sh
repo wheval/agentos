@@ -1,10 +1,9 @@
 #!/bin/sh
 set -e
-# Run compile script and ensure managed directory has files
 ./scripts/compile.sh
-if [ ! -d managed ] || [ "$(ls -A managed | wc -l)" -eq 0 ]; then
-  echo "Compile failed or managed/ is empty" >&2
+if [ ! -f managed/compiler/contract-info.json ]; then
+  echo "Missing managed/compiler/contract-info.json" >&2
   exit 1
 fi
-echo "Compile produced managed/ with files:"
+echo "Compile produced managed/ artifacts:"
 ls -la managed

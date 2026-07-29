@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../",
+  "sources": ["src/Policy.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAMA;;;;;;;;;;;;;MAIA,AAAA,eAEC;;;;;;;;;;;;;;;;;;;;;;OAAA;;;;GAJA;EAFD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAJA;;;;;;;;;yEAA0C;UAKxC,KAAiB;IAAjB;;;;;;;2HAAA,KAAiB;;yEAAA;;;;;;;GAClB;EAJD,AAAA,kBAAoC;;0DAApC,eAAoC;;;;;;;;;;;;;;GAAA;EAMpC,AAAA,kBAEC;UADC,KAAiB;;;;;6CAAa;;;;;;;;;;;kHAAiB;;;IAA/C;;;;;;;2HAAA,KAAiB;;yEAAA;;GAClB;;;;;;;;;;;;;;;;IAVD;qCAAA;;;;;;;;;;;0GAA0C;KAAA;;;;;;;;;;;;"
+}

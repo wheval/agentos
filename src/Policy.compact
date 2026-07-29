@@ -1,0 +1,13 @@
+pragma language_version >= 0.23;
+
+export ledger total_transferred: Uint<64>;
+
+witness transfer_amount(): Uint<64>;
+
+constructor() {
+  total_transferred = 0 as Uint<64>;
+}
+
+export circuit submit_transfer(): [] {
+  total_transferred = disclose((total_transferred + transfer_amount()) as Uint<64>);
+}

@@ -75,12 +75,4 @@ Midnight ensures:
 
 ## Deployment
 
-Contract deployed to Midnight Preview:
-
-**Contract Address:** midnight1zp4jdvz8v9n3c2m7a6s9p8q7r6t5u4v3w2x1y0z9a8b7c6d5
-
-**Network:** Preview
-
-**Status:** ✅ Deployed and verified
-
-**Deployment details:** See `deploy/DEPLOYMENT_OUTPUT.txt`
+Deployment is pending until a real Preview or Preprod wallet is available.
