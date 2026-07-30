@@ -62,7 +62,8 @@ Midnight ensures:
    ./scripts/compile.sh
 
 4. Test:
-   ./tests/compile.test.sh
+   npm install
+   npm test
 
 ## Public vs Private
 
@@ -75,4 +76,6 @@ Midnight ensures:
 
 ## Deployment
 
-Deployment is pending until a real Preview or Preprod wallet is available.
+Deployment is pending until a funded Preview or Preprod wallet is available.
+Do not add a contract address here until it has been returned by a successful
+network deployment and verified through the network indexer.

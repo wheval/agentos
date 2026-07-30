@@ -1,0 +1,16 @@
+{
+  "name": "agentos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "compile": "./scripts/compile.sh",
+    "test": "./tests/compile.test.sh && ./tests/contract-artifacts.test.sh && node --test tests/policy.test.mjs"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.16.0"
+  }
+}
