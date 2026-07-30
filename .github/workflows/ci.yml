@@ -16,6 +16,10 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Pinned so the lockfile is always resolved by the same npm that generated
+      # it. npm 11 prunes optional peer deps (smoldot) that npm 10 requires.
+      - run: npm install -g npm@10.9.2
+
       - run: npm ci
 
       - name: Typecheck
