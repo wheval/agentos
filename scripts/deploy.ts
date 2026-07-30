@@ -7,6 +7,22 @@
 // from the faucet for the chosen network.
 import { WebSocket } from 'ws';
 
+// The wallet SDK logs a `Wallet.Sync` error object on every poll, which buries
+// the script's own output. Drop those; keep everything else.
+const isSyncNoise = (arg: unknown): boolean =>
+  typeof arg === 'object' &&
+  arg !== null &&
+  typeof (arg as { _tag?: unknown })._tag === 'string' &&
+  (arg as { _tag: string })._tag.startsWith('Wallet.');
+
+for (const level of ['log', 'error', 'warn', 'info'] as const) {
+  const original = console[level].bind(console);
+  console[level] = (...args: unknown[]) => {
+    if (args.some(isSyncNoise)) return;
+    original(...(args as []));
+  };
+}
+
 // Must be set before any wallet import touches GraphQL subscriptions.
 // @ts-expect-error Node has no global WebSocket usable by Apollo.
 globalThis.WebSocket = WebSocket;
