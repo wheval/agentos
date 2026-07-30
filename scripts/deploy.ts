@@ -39,6 +39,7 @@ import {
 } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
 
 import * as Counter from '../managed/contract/index.js';
+import { type CounterPrivateState, initialPrivateState, witnesses } from '../contracts/witnesses.js';
 
 const NETWORKS = {
   preview: {
@@ -63,10 +64,13 @@ const PRIVATE_STATE_ID = 'counterPrivateState' as const;
 const here = path.dirname(fileURLToPath(import.meta.url));
 const zkConfigPath = path.resolve(here, '..', 'managed');
 
-const compiledContract = CompiledContract.make('counter', Counter.Contract).pipe(
-  CompiledContract.withVacantWitnesses,
-  CompiledContract.withCompiledFileAssets(zkConfigPath),
-);
+const compiledContract = CompiledContract.make<Counter.Contract<CounterPrivateState>, CounterPrivateState>(
+  'counter',
+  Counter.Contract,
+).pipe(CompiledContract.withWitnesses(witnesses), CompiledContract.withCompiledFileAssets(zkConfigPath));
+
+/** The step this deployment's first caller will use. Never leaves this machine. */
+const SECRET_STEP = BigInt(process.env.SECRET_STEP ?? '1');
 
 function readNetwork(): NetworkName {
   const flag = process.argv.indexOf('--network');
@@ -274,7 +278,7 @@ async function main() {
     const deployed = await deployContract(providers as any, {
       compiledContract,
       privateStateId: PRIVATE_STATE_ID,
-      initialPrivateState: { step: 1 },
+      initialPrivateState: initialPrivateState(SECRET_STEP),
     });
 
     const contractAddress = deployed.deployTxData.public.contractAddress;

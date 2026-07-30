@@ -1,28 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   type CircuitContext,
-  type WitnessContext,
   createCircuitContext,
   createConstructorContext,
   sampleContractAddress,
 } from '@midnight-ntwrk/compact-runtime';
 
 import { Contract, type Ledger, ledger } from '../managed/contract/index.js';
-
-/**
- * The private state never leaves this object. The witness below is the only
- * thing that reads it, and the circuit only ever sees the value inside a proof.
- */
-type CounterPrivateState = { readonly secretStep: bigint };
-
-const witnesses = {
-  secret_step: ({
-    privateState,
-  }: WitnessContext<Ledger, CounterPrivateState>): [CounterPrivateState, bigint] => [
-    privateState,
-    privateState.secretStep,
-  ],
-};
+import { type CounterPrivateState, initialPrivateState, witnesses } from '../contracts/witnesses.js';
 
 class CounterSimulator {
   readonly contract: Contract<CounterPrivateState>;
@@ -33,7 +18,7 @@ class CounterSimulator {
 
     const { currentContractState, currentPrivateState, currentZswapLocalState } =
       this.contract.initialState(
-        createConstructorContext<CounterPrivateState>({ secretStep }, '0'.repeat(64)),
+        createConstructorContext<CounterPrivateState>(initialPrivateState(secretStep), '0'.repeat(64)),
       );
 
     this.circuitContext = createCircuitContext(
@@ -54,7 +39,10 @@ class CounterSimulator {
 
   /** Replaces the caller's private step without touching public state. */
   setSecretStep(secretStep: bigint): void {
-    this.circuitContext = { ...this.circuitContext, currentPrivateState: { secretStep } };
+    this.circuitContext = {
+      ...this.circuitContext,
+      currentPrivateState: initialPrivateState(secretStep),
+    };
   }
 
   increment(): Ledger {
