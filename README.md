@@ -1,81 +1,178 @@
-# AgentOS
+# AgentOS — PrivateCounter
 
-**The control center for enterprise AI teams.**
+> A counter whose step size is chosen privately and proved to sit inside an on-chain policy bound, without the step ever being published.
 
-AgentOS helps companies safely deploy, manage, and monitor teams of AI agents. Every agent has its own role, permissions, private memory, secure secrets, and tools. Before an agent performs any sensitive action, AgentOS checks company policies using Midnight, blocks unauthorized actions, and records a tamper-proof audit trail.
+## Contract Address
 
-Companies can confidently give AI agents access to emails, GitHub, Stripe, CRMs, databases, and wallets without exposing secrets or losing control.
+| Network | Address |
+| ------- | ------- |
+| Preview | _not yet deployed_ |
+| Preprod | _not yet deployed_ |
 
-## The Problem
+> Deployment requires a faucet-funded wallet seed. Run `npm run deploy -- --network preview`
+> and paste the address the script prints into this table. Nothing goes in these cells
+> until a real transaction returns a real address.
 
-Companies want AI agents to do real work.
+## What This Does
 
-But they don't trust them with:
-- API keys
-- Company documents
-- Customer data
-- Bank accounts
-- Crypto wallets
-- Production systems
+`PrivateCounter` is a shared counter with a rule attached: every increment must be at
+least 1 and at most `max_step`.
 
-## The Solution
+The twist is where the step size lives. It is never sent to the network as a circuit
+argument. It stays on the caller's own machine as a witness, and the zero-knowledge proof
+is what convinces the chain that the rule was followed. Observers watching the ledger see
+the counter move and the running total change — they never see which step any individual
+caller chose.
 
-AgentOS gives every AI agent an identity, secure secrets, private memory, permissions, company policies, verifiable actions, and an audit history.
+That is the pattern AgentOS is built around: an autonomous agent acts under a policy, the
+policy is enforced cryptographically rather than by trust, and the agent's inputs stay
+private while the outcome stays auditable.
 
-Think of it as giving every AI employee an ID badge, job description, access card, and manager.
+## Privacy Model
 
-## AI Teams
+**PUBLIC — written to the ledger, readable by anyone**
 
-Instead of one AI assistant, companies create an AI workforce:
+| Field | Meaning |
+| ----- | ------- |
+| `round` | How many times `increment()` has been accepted |
+| `total` | Running total of every accepted step |
+| `max_step` | Largest step the contract accepts (write-once, set at deploy) |
 
-- **Finance Agent** — Pays invoices, reads email, generates reports (can't transfer >$5k)
-- **Developer Agent** — Creates PRs, reviews code, deploys staging (can't deploy production)
-- **HR Agent** — Manages leave, generates contracts (can't access engineering or finance)
-- **Operations Agent** — Manages Slack, Notion, Linear (can't access sensitive data)
+**PRIVATE — a witness supplied by the caller's machine**
 
-Each agent collaborates with others. Founder says "Hire a developer" → HR creates contract → Finance checks budget → Legal reviews → Developer creates GitHub → Operations sets up tools. Every step is verified.
+- `secret_step()` — the step size. It is not a circuit argument, it is not stored on the
+  ledger, and it is not in the transaction. Only the proof sees it.
 
-## Why Midnight?
+**PROVED WITHOUT REVEALING THE STEP**
 
-Midnight ensures:
-- Policies can't be secretly changed
-- Secrets remain private
-- Every approval is verifiable
-- Every audit record is tamper-proof
-- Sensitive actions follow company rules
+- `1 <= secret_step() <= max_step`
 
-## Pitch
+**Where `disclose()` comes in**
 
-**30 seconds:** Companies want AI agents to handle real work like paying invoices, reviewing code, and managing operations, but they don't trust them with sensitive data, API keys, or money. AgentOS is the control center for enterprise AI teams. Companies create AI agents, assign permissions, connect tools, and define policies, while Midnight ensures every sensitive action is private, policy-enforced, and cryptographically verifiable.
+The contract writes two ledger fields, and only one of them needs `disclose()`:
 
-**One line:** AgentOS is the control center that helps companies safely deploy AI teams using Midnight-powered trust and verification.
+```compact
+round = (round + 1) as Uint<64>;              // derived from public state only
+total = disclose((total + step) as Uint<64>); // derived from the private witness
+```
+
+`round` counts public events, so the compiler accepts it as-is. `total` is computed from
+the witness, so the compiler refuses to write it until it is wrapped in `disclose()`. That
+single call is the deliberate, auditable point where private data is allowed to move the
+public state. Removing it is a compile error, not a silent leak — which is the point.
+
+Note that `total` leaks strictly less than the step itself. After N rounds an observer
+knows the sum, not the individual contributions.
+
+## Tech Stack
+
+- **Midnight Network** — Preview / Preprod testnets
+- **Compact** — language version 0.23, compiler 0.31.1, runtime 0.16.0
+- **Midnight.js** — `@midnight-ntwrk/midnight-js` 4.1.x for deployment
+- **Node.js** v22+
+- **Docker** — runs the local proof server
+- **Vitest** — contract test suite
+
+## Prerequisites
+
+| Requirement | Notes |
+| ----------- | ----- |
+| Node.js v22+ | `node --version` |
+| Docker | Must be running; hosts the proof server |
+| Compact toolchain | Installed via the Midnight `compact` version manager, **not** npm |
+| Proof server | `midnightntwrk/proof-server` on port 6300 |
+| Funded testnet wallet | Only needed to deploy, not to build or test |
+
+Install the Compact toolchain:
+
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+compact update
+compact --version
+```
+
+Start the proof server:
+
+```bash
+docker pull midnightntwrk/proof-server:latest
+docker run -d --name midnight-proof-server -p 6300:6300 \
+  midnightntwrk/proof-server:latest midnight-proof-server -v
+```
 
 ## Setup
 
-1. Install Compact:
-   curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+```bash
+git clone https://github.com/wheval/agentos.git
+cd agentos
+npm install
+npm run compile
+```
 
-2. Start proof server:
-   docker run -d --name midnight-proof-server -p 6300:6300 midnightntwrk/proof-server:latest midnight-proof-server -v
+`npm run compile` runs `compact compile contracts/counter.compact managed`, which
+regenerates `managed/` from scratch:
 
-3. Compile:
-   ./scripts/compile.sh
+```
+managed/
+├── compiler/contract-info.json   circuit + witness + ledger metadata
+├── contract/index.js, index.d.ts TypeScript bindings
+├── keys/increment.prover         proving key
+├── keys/increment.verifier       verifying key
+└── zkir/increment.zkir           circuit intermediate representation
+```
 
-4. Test:
-   npm install
-   npm test
+`managed/` is committed to this repo so the compiled artifacts can be reviewed without
+installing the toolchain.
 
-## Public vs Private
+## Run Tests
 
-- **Public ledger** (`export ledger`): visible on-chain
-- **Private witness** (`witness`): never published; used only in proofs
+```bash
+npm test              # contract test suite (Vitest)
+npm run test:artifacts # committed artifacts match the contract source
+npm run typecheck     # TypeScript
+```
 
-## Compile Output
+`npm test` runs five tests against the compiled circuit through the Compact simulator:
 
-![Compile output](screenshots/compile.png)
+| Test | Covers |
+| ---- | ------ |
+| Initialises public ledger state from the constructor | Initial state |
+| Advances public state by the private step on each increment | Circuit logic + state transitions |
+| Rejects steps outside the publicly declared policy bound | Policy enforcement |
+| Never writes the private step into the public ledger | Privacy guarantee |
+| Produces identical public state for different private step sequences | Privacy guarantee |
 
-## Deployment
+## Deploy
 
-Deployment is pending until a funded Preview or Preprod wallet is available.
-Do not add a contract address here until it has been returned by a successful
-network deployment and verified through the network indexer.
+```bash
+export MIDNIGHT_SEED=<64-character hex seed>
+npm run deploy -- --network preview   # or --network preprod
+```
+
+The script derives the wallet, prints the unshielded address, waits for faucet funds,
+registers NIGHT UTXOs for DUST generation, then deploys and prints the contract address.
+
+Faucets: [Preview](https://faucet.preview.midnight.network/) ·
+[Preprod](https://faucet.preprod.midnight.network/)
+
+## Project Structure
+
+```
+agentos/
+├── contracts/counter.compact   the Compact contract
+├── managed/                    compiler output (committed)
+├── scripts/compile.sh          compile wrapper
+├── scripts/deploy.ts           testnet deployment
+├── src/                        frontend (Level 2)
+├── tests/counter.test.ts       contract test suite
+├── .github/workflows/ci.yml    CI
+└── README.md
+```
+
+## Initial Idea
+
+_[TO FILL IN]_
+
+## Screenshots
+
+_[TO FILL IN — compile output and deployed contract address]_
