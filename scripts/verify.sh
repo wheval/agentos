@@ -4,7 +4,7 @@
 set -euo pipefail
 
 NETWORK="${1:-preview}"
-ADDRESS="${2:-ab543598d77cf3d834c5f8ab89643e055f27f28d39da7c87034a36363f242f58}"
+ADDRESS="${2:-2c5b229e9092c0726cafcc7b856ef2f0ae301e25b3eb97b63881ed715fb2fe4e}"
 INDEXER="https://indexer.${NETWORK}.midnight.network/api/v3/graphql"
 
 QUERY=$(printf '{"query":"query { contractAction(address: \\"%s\\") { __typename address transaction { hash block { height } } } }"}' "$ADDRESS")

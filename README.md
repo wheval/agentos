@@ -6,10 +6,10 @@
 
 | Network | Address |
 | ------- | ------- |
-| Preview | `ab543598d77cf3d834c5f8ab89643e055f27f28d39da7c87034a36363f242f58` |
+| Preview | `2c5b229e9092c0726cafcc7b856ef2f0ae301e25b3eb97b63881ed715fb2fe4e` |
 | Preprod | _not deployed_ |
 
-Deployed in block 204856, transaction `763435a99d0b48badc721e1359b1ecd1534bcd11a44e447b08a2e6e78f8a2fc2`.
+Deployed in block 205339, transaction `492bc5bf9ff75df1d94c4977f52b8b1d9030180ffc7a812c1d4817ecb659dd70`.
 
 ## What This Does
 
@@ -164,9 +164,9 @@ npm run verify
 
 ```
 Network:  preview
-Address:  ab543598d77cf3d834c5f8ab89643e055f27f28d39da7c87034a36363f242f58
-Tx:       763435a99d0b48badc721e1359b1ecd1534bcd11a44e447b08a2e6e78f8a2fc2
-Block:    204856
+Address:  2c5b229e9092c0726cafcc7b856ef2f0ae301e25b3eb97b63881ed715fb2fe4e
+Tx:       492bc5bf9ff75df1d94c4977f52b8b1d9030180ffc7a812c1d4817ecb659dd70
+Block:    205339
 Type:     ContractDeploy
 
 Verified on-chain.
