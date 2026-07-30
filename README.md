@@ -6,8 +6,10 @@
 
 | Network | Address |
 | ------- | ------- |
-| Preview | _not yet deployed_ |
-| Preprod | _not yet deployed_ |
+| Preview | `ab543598d77cf3d834c5f8ab89643e055f27f28d39da7c87034a36363f242f58` |
+| Preprod | _not deployed_ |
+
+Deployed in block 204856, transaction `763435a99d0b48badc721e1359b1ecd1534bcd11a44e447b08a2e6e78f8a2fc2`.
 
 > Deployment requires a faucet-funded wallet seed. Run `npm run deploy -- --network preview`
 > and paste the address the script prints into this table. Nothing goes in these cells
