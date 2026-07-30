@@ -11,10 +11,6 @@
 
 Deployed in block 204856, transaction `763435a99d0b48badc721e1359b1ecd1534bcd11a44e447b08a2e6e78f8a2fc2`.
 
-> Deployment requires a faucet-funded wallet seed. Run `npm run deploy -- --network preview`
-> and paste the address the script prints into this table. Nothing goes in these cells
-> until a real transaction returns a real address.
-
 ## What This Does
 
 `PrivateCounter` is a shared counter with a rule attached: every increment must be at
@@ -157,6 +153,25 @@ registers NIGHT UTXOs for DUST generation, then deploys and prints the contract 
 Faucets: [Preview](https://faucet.preview.midnight.network/) ·
 [Preprod](https://faucet.preprod.midnight.network/)
 
+## Verify the Deployment
+
+You do not have to take the address in this README on trust. Read it back from the
+Midnight indexer yourself:
+
+```bash
+npm run verify
+```
+
+```
+Network:  preview
+Address:  ab543598d77cf3d834c5f8ab89643e055f27f28d39da7c87034a36363f242f58
+Tx:       763435a99d0b48badc721e1359b1ecd1534bcd11a44e447b08a2e6e78f8a2fc2
+Block:    204856
+Type:     ContractDeploy
+
+Verified on-chain.
+```
+
 ## Project Structure
 
 ```
@@ -165,6 +180,7 @@ agentos/
 ├── managed/                    compiler output (committed)
 ├── scripts/compile.sh          compile wrapper
 ├── scripts/deploy.ts           testnet deployment
+├── scripts/verify.sh           reads the deployment back from the indexer
 ├── src/                        frontend (Level 2)
 ├── tests/counter.test.ts       contract test suite
 ├── .github/workflows/ci.yml    CI
@@ -173,8 +189,56 @@ agentos/
 
 ## Initial Idea
 
-_[TO FILL IN]_
+**AgentOS — the control center for enterprise AI teams.**
+
+Companies want AI agents doing real work: paying invoices, reviewing code, managing
+operations. What stops them is trust. Nobody wants to hand an autonomous agent their API
+keys, customer data, bank access, or production systems and simply hope it behaves.
+
+AgentOS gives every agent an identity, scoped permissions, private memory, secure secrets,
+and a manager. Think of it as an ID badge and a job description for each AI employee:
+
+- **Finance Agent** — pays invoices, reads email, generates reports. Cannot move more than $5k.
+- **Developer Agent** — opens PRs, reviews code, deploys staging. Cannot touch production.
+- **HR Agent** — handles leave and contracts. Cannot see engineering or finance.
+- **Operations Agent** — runs Slack, Notion, Linear. Cannot reach sensitive data.
+
+Agents collaborate. "Hire a developer" fans out: HR drafts the contract, Finance checks
+budget, Legal reviews, Operations provisions tools. Every step is checked against policy
+before it runs.
+
+**Why this needs Midnight.** Policy enforcement is only worth something if the policy
+itself can't be quietly rewritten, and if checking it doesn't require handing over the very
+secrets you're protecting. Midnight gives us both: the policy bound lives on-chain where
+tampering is visible, and the agent proves compliance in zero knowledge instead of
+disclosing its inputs. The audit trail is cryptographic, not a log file somebody can edit.
+
+**Where this Level 1 contract fits.** `PrivateCounter` is the smallest honest version of
+that mechanism. `max_step` is a policy bound published on-chain. `secret_step` is an
+agent's private input that never leaves its machine. `increment()` is the agent acting: it
+proves `1 <= step <= max_step` without revealing `step`, and the single `disclose()` call
+marks the exact, auditable point where private data is permitted to affect public state.
+
+Swap the counter for a payment and `max_step` for a spending limit and you have the Finance
+Agent: an agent that can prove it stayed under budget without publishing what it spent.
+That is the primitive the rest of AgentOS is built on.
 
 ## Screenshots
 
-_[TO FILL IN — compile output and deployed contract address]_
+### Compile output
+
+`npm run compile` producing the `managed/` artifacts:
+
+![Compile output](screenshots/compile.png)
+
+### Deployed contract address
+
+`npm run deploy -- --network preview` returning the Preview address:
+
+![Deploy output](screenshots/deploy.png)
+
+### On-chain verification
+
+The deployment read back from the Midnight Preview indexer:
+
+![Indexer verification](screenshots/verify.png)
