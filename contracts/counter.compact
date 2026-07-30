@@ -1,0 +1,51 @@
+pragma language_version >= 0.23;
+
+/*
+ * PrivateCounter
+ * ------------------------------------------------------------------
+ * A counter whose step size is chosen privately by the caller and proved to sit
+ * inside an on-chain policy bound, without the step ever being sent to the
+ * network as a public circuit argument.
+ *
+ * PUBLIC — written to the ledger, readable by anyone:
+ *   round     how many times increment() has been accepted
+ *   total     running total of every accepted step
+ *   max_step  largest step the contract will accept (write-once, set on deploy)
+ *
+ * PRIVATE — a witness supplied by the caller's own machine:
+ *   secret_step()  the step size. It is never a circuit argument and is never
+ *                  stored on the ledger. Only the zero-knowledge proof sees it.
+ *
+ * PROVED WITHOUT PUBLISHING THE STEP:
+ *   1 <= secret_step() <= max_step
+ *
+ * Compare the two ledger writes in increment(). `round` is derived purely from
+ * public state, so the compiler accepts it as-is. `total` is derived from the
+ * private witness, so the compiler refuses to write it until it is wrapped in
+ * disclose() — that call is the single, deliberate, auditable point where
+ * private data is allowed to influence public state.
+ */
+
+export ledger round: Uint<64>;
+
+export ledger total: Uint<64>;
+
+export sealed ledger max_step: Uint<64>;
+
+witness secret_step(): Uint<64>;
+
+constructor() {
+  round = 0;
+  total = 0;
+  max_step = 10;
+}
+
+export circuit increment(): [] {
+  const step = secret_step();
+
+  assert(step >= 1, "step must be at least 1");
+  assert(step <= max_step, "step exceeds max_step");
+
+  round = (round + 1) as Uint<64>;
+  total = disclose((total + step) as Uint<64>);
+}

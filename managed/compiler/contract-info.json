@@ -4,7 +4,7 @@
   "runtime-version": "0.16.0",
   "circuits": [
     {
-      "name": "submit_transfer",
+      "name": "increment",
       "pure": false,
       "proof": true,
       "arguments": [
@@ -18,7 +18,7 @@
   ],
   "witnesses": [
     {
-      "name": "transfer_amount",
+      "name": "secret_step",
       "arguments": [
       ],
       "result type": {
@@ -31,8 +31,28 @@
   ],
   "ledger": [
     {
-      "name": "total_transferred",
+      "name": "round",
       "index": 0,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "total",
+      "index": 1,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "max_step",
+      "index": 2,
       "exported": true,
       "storage": "Cell",
       "type": {

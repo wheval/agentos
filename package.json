@@ -8,9 +8,16 @@
   },
   "scripts": {
     "compile": "./scripts/compile.sh",
-    "test": "./tests/compile.test.sh && ./tests/contract-artifacts.test.sh && node --test tests/policy.test.mjs"
+    "test": "vitest run",
+    "test:artifacts": "./tests/contract-artifacts.test.sh",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }
